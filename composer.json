@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "websight\\yii2\\sybase": "src/"
+            "websightnl\\yii2\\sybase\\": "src/"
         }
     }
 }
