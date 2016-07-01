@@ -1,5 +1,5 @@
 {
-    "name": "websight/yii2-sybase",
+    "name": "websightnl/yii2-sybase",
     "description": "Yii2 schema support for Sybase database, tested with SQL Anywhere 12.0.",
     "keywords": ["sybase"],
     "license" : "BSD-3-Clause-Attribution",
