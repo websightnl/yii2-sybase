@@ -1,8 +1,11 @@
 {
     "name": "websight/yii2-sybase",
-    "description": "Schema support for Sybase SQLAnywhere12 database.",
+    "description": "Schema support for Sybase database, tested with SQL Anywhere 12.0.",
     "keywords": ["sybase"],
     "license" : "BSD-3-Clause-Attribution",
+    "support": {
+        "source": "https://github.com/websightnl/yii2-sybase"
+    },
     "authors" : [
         {
             "name": "Eric Bus",
