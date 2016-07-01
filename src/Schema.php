@@ -1,6 +1,6 @@
 <?php
 
-namespace websight\yii2\sybase;
+namespace websightnl\yii2\sybase\;
 
 use yii\base\InvalidParamException;
 use yii\db\ColumnSchema;
