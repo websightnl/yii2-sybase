@@ -1,0 +1,21 @@
+{
+    "name": "websight/yii2-sybase",
+    "description": "Schema support for Sybase SQLAnywhere12 database.",
+    "keywords": ["sybase"],
+    "license" : "BSD-3-Clause-Attribution",
+    "authors" : [
+        {
+            "name": "Eric Bus",
+            "email": "eric.bus@websight.nl",
+            "homepage": "https://websight.nl"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Websight\\yii2\\sybase": "src/"
+        }
+    }
+}
