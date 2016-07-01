@@ -1,6 +1,6 @@
 <?php
 
-namespace Websight\yii2\sybase;
+namespace websight\yii2\sybase;
 
 use yii\base\InvalidParamException;
 use yii\base\NotSupportedException;
