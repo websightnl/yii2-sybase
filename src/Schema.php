@@ -335,25 +335,25 @@ SQL;
         $columnsTableName = $this->quoteTableName($columnsTableName);
 
         $sql = <<<SQL
-SELECT pt4.column_name AS "fk_column_name", ft2.table_name AS "uq_table_name", ft4.column_name AS "uq_column_name"
+SELECT pc.column_name AS "uq_column_name", pt.table_name AS "uq_table_name", fc.column_name AS "fk_column_name"
 FROM {$fkeyTableName} AS t1
-INNER JOIN {$tablesTableName} AS pt2
-ON pt2.table_id = t1.primary_table_id
-INNER JOIN {$indexTableName} AS pt3
-ON pt3.table_id = t1.primary_table_id
-AND pt3.index_id = t1.primary_index_id
-INNER JOIN {$columnsTableName} AS pt4
-ON pt4.table_id = t1.primary_table_id
-AND pt4.column_id = pt3.column_id
-INNER JOIN {$tablesTableName} AS ft2
-ON ft2.table_id = t1.foreign_table_id
-INNER JOIN {$indexTableName} AS ft3
-ON ft3.table_id = t1.foreign_table_id
-AND ft3.index_id = t1.foreign_index_id
-INNER JOIN {$columnsTableName} AS ft4
-ON ft4.table_id = t1.foreign_table_id
-AND ft4.column_id = pt3.column_id
-WHERE pt2.table_name = :tableName
+INNER JOIN {$tablesTableName} AS pt
+ON pt.table_id = t1.primary_table_id
+INNER JOIN {$indexTableName} AS pi
+ON pi.table_id = t1.primary_table_id
+AND pi.index_id = t1.primary_index_id
+INNER JOIN {$columnsTableName} AS pc
+ON pc.table_id = t1.primary_table_id
+AND pc.column_id = pi.column_id
+INNER JOIN {$tablesTableName} AS ft
+ON ft.table_id = t1.foreign_table_id
+INNER JOIN {$indexTableName} AS fi
+ON fi.table_id = t1.foreign_table_id
+AND fi.index_id = t1.foreign_index_id
+INNER JOIN {$columnsTableName} AS fc
+ON fc.table_id = t1.foreign_table_id
+AND fc.column_id = fi.column_id
+WHERE ft.table_name = :tableName
 SQL;
 
         $rows = $this->db->createCommand($sql, [
