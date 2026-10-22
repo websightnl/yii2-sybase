@@ -2,11 +2,10 @@
 
 namespace websightnl\yii2\sybase;
 
-use yii\base\InvalidParamException;
-use yii\base\NotSupportedException;
+use yii\base\InvalidArgumentException;
 
 /**
- * QueryBuilder is the query builder for MS SQL Server databases (version 2008 and above).
+ * QueryBuilder is the query builder for Sybase SQL Anywhere databases.
  *
  * @author Timur Ruziev <resurtm@gmail.com>
  * @since 2.0
@@ -43,6 +42,17 @@ class QueryBuilder extends \yii\db\QueryBuilder
     /**
      * @inheritdoc
      */
+    protected function defaultExpressionBuilders()
+    {
+        return array_merge(parent::defaultExpressionBuilders(), [
+            'yii\db\conditions\InCondition' => 'websightnl\yii2\sybase\conditions\InConditionBuilder',
+            'yii\db\conditions\LikeCondition' => 'websightnl\yii2\sybase\conditions\LikeConditionBuilder',
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function buildOrderByAndLimit($sql, $orderBy, $limit, $offset)
     {
         if (!$this->hasOffset($offset) && !$this->hasLimit($limit)) {
@@ -56,13 +66,10 @@ class QueryBuilder extends \yii\db\QueryBuilder
             $orderBy = 'ORDER BY (SELECT NULL)';
         }
 
-        if ($this->hasLimit($limit)) {
-            $orderAndLimitSql = "TOP $limit";
-        } else {
-            $orderAndLimitSql = '';
-        }
+        // START AT is 1-based and requires a TOP clause
+        $orderAndLimitSql = $this->hasLimit($limit) ? "TOP $limit" : 'TOP ALL';
         if ($this->hasOffset($offset)) {
-            $orderAndLimitSql .= $this->separator . "START AT $offset";
+            $orderAndLimitSql .= $this->separator . 'START AT ' . ($offset + 1);
         }
 
         $sql = preg_replace('/^([\s(])*SELECT(\s+DISTINCT)?(?!\s*TOP\s*\()/i', "\\1SELECT\\2 $orderAndLimitSql", $sql);
@@ -122,7 +129,7 @@ class QueryBuilder extends \yii\db\QueryBuilder
      * @param string $schema the schema of the tables. Defaults to empty string, meaning the current or default schema.
      * @param string $table the table name. Defaults to empty string, meaning that no table will be changed.
      * @return string the SQL statement for checking integrity
-     * @throws InvalidParamException if the table does not exist or there is no sequence associated with the table.
+     * @throws InvalidArgumentException if the table does not exist or there is no sequence associated with the table.
      */
     public function checkIntegrity($check = true, $schema = '', $table = '')
     {
@@ -131,7 +138,7 @@ class QueryBuilder extends \yii\db\QueryBuilder
         }
         $table = $this->db->quoteTableName($table);
         if ($this->db->getTableSchema($table) === null) {
-            throw new InvalidParamException("Table not found: $table");
+            throw new InvalidArgumentException("Table not found: $table");
         }
         $enable = $check ? 'CHECK' : 'NOCHECK';
 
@@ -190,51 +197,6 @@ class QueryBuilder extends \yii\db\QueryBuilder
         $schema = $model->getTableSchema();
         $columns = array_keys($schema->columns);
         return $columns;
-    }
-
-    /**
-     * @inheritdoc
-     * @throws NotSupportedException if `$columns` is an array
-     */
-    protected function buildSubqueryInCondition($operator, $columns, $values, &$params)
-    {
-        if (is_array($columns)) {
-            throw new NotSupportedException(__METHOD__ . ' is not supported by MSSQL.');
-        }
-        return parent::buildSubqueryInCondition($operator, $columns, $values, $params);
-    }
-
-    /**
-     * Builds SQL for IN condition
-     *
-     * @param string $operator
-     * @param array $columns
-     * @param array $values
-     * @param array $params
-     * @return string SQL
-     */
-    protected function buildCompositeInCondition($operator, $columns, $values, &$params)
-    {
-        $quotedColumns = [];
-        foreach ($columns as $i => $column) {
-            $quotedColumns[$i] = strpos($column, '(') === false ? $this->db->quoteColumnName($column) : $column;
-        }
-        $vss = [];
-        foreach ($values as $value) {
-            $vs = [];
-            foreach ($columns as $i => $column) {
-                if (isset($value[$column])) {
-                    $phName = self::PARAM_PREFIX . count($params);
-                    $params[$phName] = $value[$column];
-                    $vs[] = $quotedColumns[$i] . ($operator === 'IN' ? ' = ' : ' != ') . $phName;
-                } else {
-                    $vs[] = $quotedColumns[$i] . ($operator === 'IN' ? ' IS' : ' IS NOT') . ' NULL';
-                }
-            }
-            $vss[] = '(' . implode($operator === 'IN' ? ' AND ' : ' OR ', $vs) . ')';
-        }
-
-        return '(' . implode($operator === 'IN' ? ' OR ' : ' AND ', $vss) . ')';
     }
 
     /**

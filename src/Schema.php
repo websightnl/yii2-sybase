@@ -2,12 +2,12 @@
 
 namespace websightnl\yii2\sybase;
 
-use yii\base\InvalidParamException;
+use yii\base\InvalidArgumentException;
 use yii\db\ColumnSchema;
 use yii\db\TableSchema;
 
 /**
- * Schema is the class for retrieving metadata from a Sybase SQL Anywhere 12 databases.
+ * Schema is the class for retrieving metadata from Sybase SQL Anywhere (12 and later) databases.
  *
  * @author Eric Bus <eric.bus@websight.nl>
  * @since 2.0
@@ -22,6 +22,14 @@ class Schema extends \yii\db\Schema
      * @var string the default schema used for the current session.
      */
     public $defaultSchema = '';
+    /**
+     * @var string character used to quote table names
+     */
+    protected $tableQuoteCharacter = '"';
+    /**
+     * @var string character used to quote column names
+     */
+    protected $columnQuoteCharacter = '"';
     /**
      * @var array mapping from physical column types (keys) to abstract column types (values)
      */
@@ -82,29 +90,7 @@ class Schema extends \yii\db\Schema
     }
 
     /**
-     * Quotes a table name for use in a query.
-     * A simple table name has no schema prefix.
-     * @param string $name table name.
-     * @return string the properly quoted table name.
-     */
-    public function quoteSimpleTableName($name)
-    {
-        return strpos($name, '"') === false ? "\"{$name}\"" : $name;
-    }
-
-    /**
-     * Quotes a column name for use in a query.
-     * A simple column name has no prefix.
-     * @param string $name column name.
-     * @return string the properly quoted column name.
-     */
-    public function quoteSimpleColumnName($name)
-    {
-        return strpos($name, '"') === false && $name !== '*' ? "\"{$name}\"" : $name;
-    }
-
-    /**
-     * Creates a query builder for the MSSQL database.
+     * Creates a query builder for the Sybase database.
      * @return QueryBuilder query builder interface.
      */
     public function createQueryBuilder()
@@ -219,7 +205,7 @@ class Schema extends \yii\db\Schema
         $objectsTableName = 'SYSOBJECT';
         $remarksTableName = 'SYSREMARK';
         $domainsTableName = 'SYSDOMAIN';
-        $whereSql = "t2.table_name = '{$table->name}'";
+        $whereSql = 't2.table_name = :tableName';
 
         $columnsTableName = $this->quoteTableName($columnsTableName);
         $tablesTableName = $this->quoteTableName($tablesTableName);
@@ -243,7 +229,7 @@ WHERE {$whereSql}
 SQL;
 
         try {
-            $columns = $this->db->createCommand($sql)->queryAll();
+            $columns = $this->db->createCommand($sql, [':tableName' => $table->name])->queryAll();
             if (empty($columns)) {
                 return false;
             }
@@ -280,7 +266,7 @@ SQL;
             case 'PRIMARY KEY': $indexCategory = 1; break;
             case 'UNIQUE': $indexCategory = 3; break;
             default:
-                throw new InvalidParamException(\Yii::t('app', 'Invalid type parameter, use PRIMARY KEY or UNIQUE'));
+                throw new InvalidArgumentException(\Yii::t('app', 'Invalid type parameter, use PRIMARY KEY or UNIQUE'));
         }
 
         $sql = <<<SQL
