@@ -1,7 +1,7 @@
 {
     "name": "websightnl/yii2-sybase",
-    "description": "Yii2 schema support for Sybase database, tested with SQL Anywhere 12.0.",
-    "keywords": ["sybase"],
+    "description": "Yii2 schema support for Sybase database, tested with SQL Anywhere 12.0 and 17.",
+    "keywords": ["sybase", "sql anywhere", "yii2"],
     "license" : "BSD-3-Clause-Attribution",
     "support": {
         "source": "https://github.com/websightnl/yii2-sybase"
@@ -14,8 +14,9 @@
         }
     ],
     "require": {
-        "php": ">=5.4.0",
-        "yiisoft/yii2": ">=2.0.6"
+        "php": ">=8.0",
+        "ext-pdo": "*",
+        "yiisoft/yii2": "~2.0.14"
     },
     "autoload": {
         "psr-4": {

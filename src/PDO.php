@@ -18,10 +18,10 @@ class PDO extends \PDO
 {
     /**
      * Returns value of the last inserted ID.
-     * @param string|null $sequence the sequence name. Defaults to null.
-     * @return integer last inserted ID value.
+     * @param string|null $name the sequence name. Defaults to null.
+     * @return string|false last inserted ID value.
      */
-    public function lastInsertId($sequence = null)
+    public function lastInsertId(?string $name = null): string|false
     {
         return $this->query('SELECT @@IDENTITY')->fetchColumn();
     }
@@ -34,13 +34,13 @@ class PDO extends \PDO
      * @return mixed A successful call returns the value of the requested PDO attribute.
      * An unsuccessful call returns null.
      */
-    public function getAttribute($attribute)
+    public function getAttribute(int $attribute): mixed
     {
         try {
             return parent::getAttribute($attribute);
         } catch (\PDOException $e) {
             switch ($attribute) {
-                case PDO::ATTR_SERVER_VERSION:
+                case self::ATTR_SERVER_VERSION:
                     return $this->query("SELECT CAST(SERVERPROPERTY('productversion') AS VARCHAR)")->fetchColumn();
                 default:
                     throw $e;
